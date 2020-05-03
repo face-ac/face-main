@@ -1,2 +1,8 @@
 bluepy 
 requests
+face_recognition
+glob
+os
+sys
+cv2
+time

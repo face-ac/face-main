@@ -8,6 +8,13 @@ import sys
 import cv2
 import time
 
+from logger.py import *
+
+#TODO import C files for lcd?
+
+
+
+
 #path to main folder
 root = os.path.dirname(os.path.abspath('machine learning facial recognition'))
 #path subject to change on final product
@@ -29,16 +36,13 @@ for fileName_relative in glob.glob(root+"./known/*.jpg", recursive = True):
 #Aakash's code here
 # the value 0 states that we are using integrated camera.
 # If we cannot detect the camera module, might wanna change this parameter
-captured_image = cv2.VideoCapture(0)
-result = True
-
-while result:
+while(1)
+    captured_image = cv2.VideoCapture(0)
 
     ret, img = captured_image.read()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
-    # Draw the rectangle around each face
     count = 0
 
     for (x,y,w,h) in faces:
@@ -62,18 +66,18 @@ while result:
     		results = face_recognition.compare_faces([known_encoding], unknown_encoding)
     		#print(results)
     		if(results[0] == True):
-        		print('yes')
         		#TODO unlock door function here (Jared go here)
-        
-    		#TODO delete/move jpg from folder to backend (for logging purposes) (Ben here)
-
+                #unlock function
+                log_packet1 = dict(name = files, image = face)
+                log('Face Recognized', log_packet1, INFO)
+                time.sleep(7)
+                #lock function
 
         count+=1
-        
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        log_packet2 = dict(name = 'unknown', image = face)
+        log('Unrecognized face', log_packet2, INFO)
 
-time.sleep(3)
-captured_image.release()
-cv2.destroyAllWindows()
+    time.sleep(3)
+    captured_image.release()
+    cv2.destroyAllWindows()
 
