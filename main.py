@@ -62,8 +62,8 @@ while 1:
         cv2.imwrite(str(count)+'.jpg', face)
         os.chdir(root)
 
-        # flag for recognized/unrecognized.
-        # needed so we don't log a face event twice.
+        # recognized is a flag for recognized/unrecognized faces.
+        # We need this so we don't log "face recognized" and "unrecognized face" for the same face.
         recognized = False
         
         for files in known_files:
@@ -76,7 +76,7 @@ while 1:
             unknown_encoding = face_recognition.face_encodings(unknown_image, known_face_locations=[face_location])[0]
             results = face_recognition.compare_faces([known_encoding], unknown_encoding)
             if(results[0] == True):
-                # set recognized flag and log
+                # Set recognized flag and log
                 recognized = True
                 log("face recognized", fields={"name": files, "image": face}, level=INFO)
 
@@ -86,7 +86,7 @@ while 1:
         count+=1
 
         if not recognized:
-            # log unrecognized only if we don't recognize it in loop above
+            # Log unrecognized only if we did not recognize it in loop above
             log("unrecognized face", fields={"name": "unknown", "image": face}, level=INFO)
 
     time.sleep(3)
