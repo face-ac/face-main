@@ -2,8 +2,8 @@ import requests
 import os
 import time
 
-API_ENDPOINT = os.getenv("API_ENDPOINT")
-API_TOKEN = os.getenv("API_TOKEN")
+API_ENDPOINT = os.getenv("API_ENDPOINT", "https://face-be.herokuapp.com/api/log")
+API_TOKEN = os.getenv("API_TOKEN", "test_token")
 
 INFO = "info"
 ERROR = "error"
