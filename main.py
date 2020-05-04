@@ -61,6 +61,10 @@ while 1:
         os.chdir(root+"./logger")
         cv2.imwrite(str(count)+'.jpg', face)
         os.chdir(root)
+
+        # flag for recognized/unrecognized.
+        # needed so we don't log a face event twice.
+        recognized = False
         
         for files in known_files:
             print(files)
@@ -72,12 +76,19 @@ while 1:
             unknown_encoding = face_recognition.face_encodings(unknown_image, known_face_locations=[face_location])[0]
             results = face_recognition.compare_faces([known_encoding], unknown_encoding)
             if(results[0] == True):
+                # set recognized flag and log
+                recognized = True
                 log("face recognized", fields={"name": files, "image": face}, level=INFO)
+
                 #unlock door
                 time.sleep(7) #wait 7s
                 #lock door
         count+=1
-        log("unrecognized face", fields={"name": "unknown", "image": face}, level=INFO)
+
+        if not recognized:
+            # log unrecognized only if we don't recognize it in loop above
+            log("unrecognized face", fields={"name": "unknown", "image": face}, level=INFO)
+
     time.sleep(3)
     captured_image.release()
     cv2.destroyAllWindows()
