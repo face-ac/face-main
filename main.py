@@ -6,6 +6,9 @@ import glob
 import os
 import sys
 
+#used for python search path
+sys.path.append('/usr/local/lib/python3.7/site-packages')
+
 #AV imports
 import cv2
 import time
@@ -14,11 +17,28 @@ import time
 import requests
 from logger import log, INFO
 
+#JG imports
+import board 
+import digitalio
+import adafruit_character_lcd.character_lcd as characterlcd
 import argparse
-#TODO import C files for lcd?
 
+#init gpio output for lock
+lock = digitalio.DigitalInOut(board.GPIO_P13)
+lock.direction = digitalio.Direction.OUTPUT
 
+#init gpio for LCD
+lcd_rs = digitalio.DigitalInOut(board.GPIO_P37)
+lcd_en = digitalio.DigitalInOut(board.GPIO_P36)
+lcd_d7 = digitalio.DigitalInOut(board.GPIO_P16)
+lcd_d6 = digitalio.DigitalInOut(board.GPIO_P18)
+lcd_d5 = digitalio.DigitalInOut(board.GPIO_P29)
+lcd_d4 = digitalio.DigitalInOut(board.GPIO_P31)
 
+#init LCD type
+lcd_columns = 16
+lcd_rows = 2
+lcd = characterlcd.Character_LCD_Mono(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows)
 
 #path to main folder
 root = os.path.dirname(os.path.abspath('face-main'))
@@ -30,15 +50,7 @@ known_files = []
 #unknown_files = []
     
 parser = argparse.ArgumentParser()
-#parser.add_argument('--model', help='.tflite model path',
-#                        default=os.path.join(default_model_dir,default_model))
-#parser.add_argument('--labels', help='label file path',
-#                        default=os.path.join(default_model_dir, default_labels))
-#parser.add_argument('--top_k', type=int, default=3,
-#                        help='number of categories with highest score to display')
 parser.add_argument('--camera_idx', type=int, help='Index of which video source to use. ', default = 0)
-#parser.add_argument('--threshold', type=float, default=0.1,
-#                        help='classifier score threshold')
 args = parser.parse_args()
 
 # fills known_files with .jpg file names found in folder 'known'
@@ -93,16 +105,21 @@ while 1:
                 # Set recognized flag and log
                 recognized = True
                 log("face recognized", fields={"name": files, "image": face}, level=INFO)
-
                 #unlock door
+                lock.value = False
+                lcd.message = "Access Granted"
                 time.sleep(7) #wait 7s
                 #lock door
+                lock.value = True
+                lcd.clear()
         count+=1
 
         if not recognized:
             # Log unrecognized only if we did not recognize it in loop above
             log("unrecognized face", fields={"name": "unknown", "image": face}, level=INFO)
-
+            lcd.message = "Access Denied"
+            time.sleep(5) #wait 5s
+            lcd.clear()
     time.sleep(3)
     captured_image.release()
     cv2.destroyAllWindows()
