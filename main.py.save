@@ -1,5 +1,3 @@
-
-
 #BN imports
 import face_recognition
 import glob
@@ -12,9 +10,10 @@ import time
 
 #BK imports
 import requests
-from logger import log, INFO
+from logger import log
 
 import argparse
+
 #TODO import C files for lcd?
 
 
@@ -28,21 +27,9 @@ face_cascade = cv2.CascadeClassifier('opencv-master/data/haarcascades/haarcascad
 #hold .jpg names to be called in later functions
 known_files = []
 #unknown_files = []
-    
-parser = argparse.ArgumentParser()
-#parser.add_argument('--model', help='.tflite model path',
-#                        default=os.path.join(default_model_dir,default_model))
-#parser.add_argument('--labels', help='label file path',
-#                        default=os.path.join(default_model_dir, default_labels))
-#parser.add_argument('--top_k', type=int, default=3,
-#                        help='number of categories with highest score to display')
-parser.add_argument('--camera_idx', type=int, help='Index of which video source to use. ', default = 0)
-#parser.add_argument('--threshold', type=float, default=0.1,
-#                        help='classifier score threshold')
-args = parser.parse_args()
 
 # fills known_files with .jpg file names found in folder 'known'
-for fileName_relative in glob.glob(root+"/known/*jpg", recursive = True):
+for fileName_relative in glob.glob(root+"./known/*.jpg", recursive = True):
 
     fileName_absolute = os.path.basename(fileName_relative)                
 
@@ -50,7 +37,7 @@ for fileName_relative in glob.glob(root+"/known/*jpg", recursive = True):
     #type(fileName_absolute)
     known_files.append(fileName_absolute)
 
-for fileName_relative in glob.glob(root+"/known/*jpeg", recursive = True):
+for fileName_relative in glob.glob(root+"./known/*.jpeg", recursive = True):
 
     fileName_absolute = os.path.basename(fileName_relative)                
 
@@ -62,6 +49,17 @@ for fileName_relative in glob.glob(root+"/known/*jpeg", recursive = True):
 
 
 while 1:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', help='.tflite model path',
+                        default=os.path.join(default_model_dir,default_model))
+    parser.add_argument('--labels', help='label file path',
+                        default=os.path.join(default_model_dir, default_labels))
+    parser.add_argument('--top_k', type=int, default=3,
+                        help='number of categories with highest score to display')
+    parser.add_argument('--camera_idx', type=int, help='Index of which video source to use. ', default = 0)
+    parser.add_argument('--threshold', type=float, default=0.1,
+                        help='classifier score threshold')
+    args = parser.parse_args()
     captured_image = cv2.VideoCapture(args.camera_idx)
     
     ret, img = captured_image.read()
@@ -72,7 +70,7 @@ while 1:
     
     for (x,y,w,h) in faces:
         face = img[y:y+h, x:x+w]
-        os.chdir(root+"/logger")
+        #os.chdir(root+"./logger")
         cv2.imwrite(str(count)+'.jpg', face)
         os.chdir(root)
 
@@ -82,8 +80,8 @@ while 1:
         
         for files in known_files:
             print(files)
-            known_image = face_recognition.load_image_file(root+"/known/"+files)
-            unknown_image = face_recognition.load_image_file(root+"/logger/"+str(count) + ".jpg")
+            known_image = face_recognition.load_image_file("./known/"+files)
+            unknown_image = face_recognition.load_image_file("./logger/"+str(count) + ".jpg")
             height, width, _ = unknown_image.shape
             face_location = (0, width, height, 0)
             known_encoding = face_recognition.face_encodings(known_image)[0]
