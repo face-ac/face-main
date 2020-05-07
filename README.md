@@ -22,6 +22,6 @@ source venv/bin/activate
 # install the package inside venv
 pip3 install -r requirements.txt 
 # Run the application
-python3 index.py
+python3 main.py
 ```
 
